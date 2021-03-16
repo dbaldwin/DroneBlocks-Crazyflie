@@ -3,8 +3,6 @@ import Bluetooth from './bluetooth';
 
 window.init = function() {
 
-    new Bluetooth();
-
     const left = nipplejs.create({
         zone: document.getElementById('left_stick'),
         mode: 'static',
@@ -37,6 +35,10 @@ window.init = function() {
         
         console.log("throttle: " + throttle + ", yaw: " + yaw);
 
+    });
+
+    document.getElementById('connect').addEventListener('click', () => {
+        new Bluetooth().connect();
     });
 
 }

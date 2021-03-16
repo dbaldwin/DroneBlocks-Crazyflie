@@ -1,12 +1,68 @@
 export default class Bluetooth {
 
-    // const serviceUUID     = '00000201-1c7f-4f9e-947b-43b7c00a9a08';
-    // const exCharUUID      = '00000202-1c7f-4f9e-947b-43b7c00a9a08';
-    // const txCharUUID      = '00000203-1c7f-4f9e-947b-43b7c00a9a08';
-    // const rxCharUUID      = '00000204-1c7f-4f9e-947b-43b7c00a9a08';
-
     constructor() {
-        console.log("Bluetooth constructor");
+        this.serviceUUID = '00000201-1c7f-4f9e-947b-43b7c00a9a08';
+        this.exCharUUID = '00000202-1c7f-4f9e-947b-43b7c00a9a08';
+        this.txCharUUID = '00000203-1c7f-4f9e-947b-43b7c00a9a08';
+        this.rxCharUUID = '00000204-1c7f-4f9e-947b-43b7c00a9a08';
+        this.bluetoothDevice;
+        this.mainServer;
+    }
+
+    connect() {
+        let options = { filters:[{ name: "Crazyflie"}], optionalServices: [this.serviceUUID] };
+        
+        navigator.bluetooth.requestDevice(options).then(device => {
+            
+            this.bluetoothDevice = device;
+
+            // Adding event listener to detect loss of connection
+            this.bluetoothDevice.addEventListener('gattserverdisconnected', this.disconnectHandler);
+            console.log('> Found ' + this.bluetoothDevice.name);
+            console.log('Connecting to GATT Server...');
+
+            // Connect to GATT server
+            return this.bluetoothDevice.gatt.connect().then(gattServer => {
+                this.mainServer = gattServer;
+                console.log('> Bluetooth Device connected: ');
+            })
+            
+            // When matching device is found and selected, get the main service
+            .then(server => {
+
+                console.log('Getting main Service...');
+                return this.mainServer.getPrimaryService(this.serviceUUID);
+
+            })
+            .then(service => {
+
+                // Storing the main service object globally for easy access from other functions
+                this.mainService = service;
+                console.log('> serviceReturn: ' + service);
+
+                // Get characteristics and call handler functions for both
+                return Promise.all([
+                    service.getCharacteristic(this.exCharUUID)
+                    .then(characteristic => {
+                        this.exChar = characteristic;
+                        console.log('EX characteristic ok');
+
+                        // Pause a few seconds
+                        // setTimeout(() => {
+                        //     startSendingControlData()
+                        //     console.log("starting")
+                        // }, 5000)
+                    })
+                    .catch(error => {
+                        console.log("Failed in EX char init", error);
+                    })
+                ]);
+            });
+        });
+    }
+
+    disconnectHandler() {
+        console.log("Handle disconnection");
     }
 
 }
