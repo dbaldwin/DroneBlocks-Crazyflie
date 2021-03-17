@@ -1,12 +1,16 @@
+import Commander from './commander.js'
+
 export default class Bluetooth {
 
-    constructor() {
+    constructor(commander) {
         this.serviceUUID = '00000201-1c7f-4f9e-947b-43b7c00a9a08';
         this.exCharUUID = '00000202-1c7f-4f9e-947b-43b7c00a9a08';
         this.txCharUUID = '00000203-1c7f-4f9e-947b-43b7c00a9a08';
         this.rxCharUUID = '00000204-1c7f-4f9e-947b-43b7c00a9a08';
         this.bluetoothDevice;
         this.mainServer;
+        this.isDroneConnected = false;
+        this.commander = commander;
     }
 
     connect() {
@@ -17,7 +21,8 @@ export default class Bluetooth {
             this.bluetoothDevice = device;
 
             // Adding event listener to detect loss of connection
-            this.bluetoothDevice.addEventListener('gattserverdisconnected', this.disconnectHandler);
+            this.bluetoothDevice.addEventListener('gattserverdisconnected', this.disconnectHandler.bind(this));
+
             console.log('> Found ' + this.bluetoothDevice.name);
             console.log('Connecting to GATT Server...');
 
@@ -47,11 +52,12 @@ export default class Bluetooth {
                         this.exChar = characteristic;
                         console.log('EX characteristic ok');
 
-                        // Pause a few seconds
-                        // setTimeout(() => {
-                        //     startSendingControlData()
-                        //     console.log("starting")
-                        // }, 5000)
+                        // We are connected so let's start sending setpoint messages
+                        this.isDroneConnected = true;
+
+                        // Start the commander
+                        this.commander.run(this.exChar);
+
                     })
                     .catch(error => {
                         console.log("Failed in EX char init", error);
@@ -62,7 +68,8 @@ export default class Bluetooth {
     }
 
     disconnectHandler() {
-        console.log("Handle disconnection");
+        this.isDroneConnected = false;
+        this.commander.kill();
     }
 
 }
