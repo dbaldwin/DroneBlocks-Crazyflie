@@ -1,6 +1,7 @@
 import VirtualStick from './virtualstick';
 import Commander from './commander';
 import Bluetooth from './bluetooth';
+//import GamePad from './gamepad';
 
 window.init = function() {
 
