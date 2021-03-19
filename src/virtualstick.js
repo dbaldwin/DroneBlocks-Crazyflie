@@ -8,9 +8,10 @@ export default class VirtualStick {
         this.bluetooth = bluetooth;
         this.commander = commander;
         this.throttle = 0; // 0 to 65535
-        this.roll = 0; // -20 to 20
+        this.yaw = 0; // -100 to 100
+        this.roll = 0; // -25 to 25
         this.maxRoll = 25;
-        this.pitch = 0; // -20 to 20
+        this.pitch = 0; // -25 to 25
         this.maxPitch = 25;
 
         const left = nipplejs.create({
@@ -38,7 +39,9 @@ export default class VirtualStick {
             // Crazyflie expects 0-65535
             this.throttle = nipple.distance * Math.sin(nipple.angle.radian);
 
-            var yaw = ((nipple.distance * Math.cos(nipple.angle.radian)) / this.lSize);
+            // Set yaw
+            this.yaw = nipple.distance * Math.cos(nipple.angle.radian);
+            this.commander.yaw = parseInt(this.yaw);
 
             // If we have a connection let's send command packets
             if (this.bluetooth.isDroneConnected) {
