@@ -12,10 +12,12 @@ window.init = function() {
     let mc;
 
     if (document.location.href.indexOf('droneblocks.html') > -1) {
+
         mc = new MotionCommander(bluetooth, commander);
         document.getElementById('launch').addEventListener('click', () => {
             mc.takeOff();
         });
+        
     } else {
         vs = new VirtualStick(bluetooth, commander);
     }
