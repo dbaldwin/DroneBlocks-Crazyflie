@@ -15,7 +15,7 @@ window.init = function() {
 
         mc = new MotionCommander(bluetooth, commander);
         document.getElementById('launch').addEventListener('click', () => {
-            mc.takeOff();
+            mc.launchMission();
         });
         
     } else {
