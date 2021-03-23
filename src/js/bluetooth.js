@@ -1,4 +1,4 @@
-import Commander from './commander.js'
+import Commander from './commander'
 
 export default class Bluetooth {
 
